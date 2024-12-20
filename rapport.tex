@@ -1,0 +1,183 @@
+\documentclass[11pt]{rapport-algav}
+% Pour les documents écrits en général, entre 10pt et 12pt
+
+% Bonne lecture des lettres accentuées :
+\usepackage[utf8]{inputenc}
+% si ça ne marche pas sur des systèmes un peu anciens, à la place
+% de [utf8] on peut essayer [cp1252] sur Windows, ou [latin1] sur
+% Mac ou Linux / Ubuntu / Fedora
+
+% Choix d'une police de caractères :
+\usepackage{lmodern}
+% Dizaines d'autres possibilités, par exemple iwona, charter...
+% Voir par exemple  http://www.tug.dk/FontCatalogue/mathfonts.html
+\usepackage[T1]{fontenc} % Nécessaire avec certaines police
+\usepackage[section]{placeins}
+% Les paquets suivants permettent d'inclure des liens internets,
+% des images, des pages pdf :
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{pdfpages}
+\usepackage{multirow}
+
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{backcolourLight}{RGB}{251, 241, 199}
+\definecolor{frontcolourLight}{RGB}{60, 56, 54}
+\definecolor{backcolourDark}{RGB}{40,40,40}
+\definecolor{frontcolourDark}{RGB}{251, 241, 199}
+
+\lstdefinestyle{listingstyleBasic}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=true,
+    breaklines=true,
+    captionpos=t,
+    keepspaces=true,
+    %numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    extendedchars=true,
+    literate={à}{{\`a}}1 {ê}{{\^e}}1 {é}{{\'e}}1 {è}{{\`e}}1,
+}
+
+
+\lstset{style=listingstyleBasic}
+
+%%%%%%%  FIN DE L'EN-TÊTE - DÉBUT DU CONTENU %%%%%%
+\begin{document}
+
+
+
+\title{Rapport Projet d'Algorithmique Avancée - MU4IN500}
+
+
+\author{
+	\\Loïc Daudé Mondet
+	\\21304461
+	\\
+	\\Réda Boudrouss
+	\\---------
+}
+
+\date{19/12/2024}
+
+\maketitle
+
+\newpage
+\tableofcontents
+\newpage
+
+\chapter{Introduction}
+Le but du problème consiste à représenter un dictionnaire de mots. Dans cette optique, nous proposons l'implémentation de deux structures de tries concurrentes puis une étude expérimentale permettant de mettre en avant les avantages et inconvénients de chacun des modèles.
+
+\vspace{5em}
+
+\chapter{Présentation des deux structures de données}
+
+\section{Patricia tries}
+Dans les patricia tries (Practical Algorithm To Retrieve Information Coded In Alphanumeric), chaque noeud interne ne permet pas de distinguer une lettre, mais la plus longue sous-chaîne de lettres commune à plusieurs mots
+
+\begin{figure}[ht!]
+		\centering
+
+		\adjincludegraphics[scale=0.1]{assets/Patricia_trie.png}
+		\caption{Exemple de Patricia Trie}
+		\label{fig:Patricia_trie}
+	\end{figure}
+
+
+\newpage
+
+\section{Hybrid tries}
+Un trie hybride est un arbre ternaire dont chaque nœud contient un caractère et une valeur (non vide lorsque le nœud représente une clé).
+Chaque nœud a 3 pointeurs : un lien Inf vers le sous arbre dont le premier caractère est inférieur à son caractère, un lien Eq vers le sous arbre dont le premier caractère est égal à son caractère, un lien Sup vers le sous arbre dont le premier caractère est supérieur à son caractère.
+
+\begin{figure}[ht!]
+			\centering
+			\adjincludegraphics[scale=0.3]{assets/Hybrid_trie.png}
+			\caption{Exemple de Hybrid Trie pour l'insertion des mots : romane, romanus, romulus, rubens, ruber, rubicon, rubicundus}
+			\label{fig:Hybrid_trie}
+\end{figure}
+
+\newpage
+
+\chapter{Implémention des structures de données}
+
+\section{Choix du langage}
+
+Nous avons choisi pour l'implémentation le langage JavaScript, malgré sa mauvaise réputation ce langage dispose d'une bibliothèque standard très étoffée notamment en ce qui concerne la manipulation des chaînes de caractères ou le parsing du JSON. Le fait qu'il soit un langage de script permet également un prototypage rapide, pour autant, les moteurs disponibles sont très performants ce qui est crucial quand il s'agit de traiter de grandes quantités de données (ici beaucoup de texte). Afin de rendre notre code plus sûr et correct, nous avons opté pour l'utilisation du sur-ensemble TypeScript qui permet comme son nom le laisse transparaître un typage des données. Aussi, nous utilisons le runtime Deno car il gère nativement le TypeScript.
+
+\section{Architecture du code}
+TypeScript est un langage orienté objet, nous avons donc implémenté les deux types de Trie en utilisant des classes.
+Plus précisement deux classes pour chaque Trie (une pour l'arbre et une pour les noeuds).
+
+\begin{figure}[ht!]
+			\centering
+			\adjincludegraphics[scale=0.3]{assets/classes.png}
+			\caption{Classes et interfaces pour les différents Tries}
+			\label{fig:Classes}
+\end{figure}
+
+\newpage
+
+\chapter{Présentation}
+\section{Structure 1 : Patricia-Tries}
+\subsection{Question 1.1}
+Comme nous utilisons un langage de haut niveau qui traite les chaînes de caractère comme des objets, nous pouvons nous permettre d'utiliser un booléen et non un caractère ASCII pour marquer la fin d'un mot.
+\subsection{Question 1.3}
+\begin{figure}[ht!]
+			\centering
+			\adjincludegraphics[scale=0.15]{assets/exemple_base_patricia_trie.png}
+			\caption{Arbre représentant l'exemple de base avec un Patricia Trie}
+			\label{fig:exemple_pat}
+\end{figure}
+
+On remarque que les caractères spéciaux et les accents ont été retirés de la phrase de base afin d'être compatible avec le code ASCII.\\
+NB: Notre implémentation utilise le code UTF-8 car c'est le standard en JavaScript/TypeScript, ce qui signifie que nous aurions pu nous passer de ces restrictions.
+\newpage
+\section{Structure 2 : Tries Hybrides}
+\subsection{Question 1.5}
+\begin{figure}[ht!]
+		\centering
+		\adjincludegraphics[scale=0.32]{assets/exemple_base_hybrid_trie.pdf}
+		\caption{Arbre représentant l'exemple de base avec un Hybrid Trie}
+		\label{fig:exemple_hyb}
+	\end{figure}
+
+\newpage  % force la meme page
+\chapter{Fonctions complexes}
+\section{Question 3.7}
+\section{Question 3.8}
+Pour rendre un trie hybride plus équilibré on peut appliquer plusieurs stratégies, premièrement on pourrait essayer de faire des rotations comme avec des arbres rouge-noir, mais il faudrait pendre en compte le fait qu'ici c'est un arbre ternaire, on pourrait aussi extraire les mots de l'arbre, les triers par ordre alphabétique et en reconstruire un nouveau.
+Pour déterminer si un trie hybride est trop déséquilibré on pourrait comparer la profondeur moyenne des branches avec la profondeur max rencontrée, si ce rapport est supérieur à un seuil fixé, disons 2, alors on considère l'arbre comme étant trop déséquilibré. C'est cette approche couplée au tri par ordre alphabétique que nous avons choisi d'implémenter.
+
+\chapter{Complexités}
+\section{Question 4.9}
+
+\chapter{Étude expérimentale}
+\section{Question 6.10}
+\section{Question 6.11}
+\section{Question 6.12}
+\section{Question 6.13}
+\section{Question 6.13}
+
+%\renewcommand\thesection{\Alph{section}}
+%\renewcommand\thesubsection{\thesection.\Alph{subsection}}
+%\begin{appendices}
+
+%\end{appendices}
+\end{document}
