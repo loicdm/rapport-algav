@@ -3,12 +3,24 @@
 
 % Bonne lecture des lettres accentuées :
 \usepackage[utf8]{inputenc}
+
 % si ça ne marche pas sur des systèmes un peu anciens, à la place
 % de [utf8] on peut essayer [cp1252] sur Windows, ou [latin1] sur
 % Mac ou Linux / Ubuntu / Fedora
 
 % Choix d'une police de caractères :
-\usepackage{lmodern}
+\usepackage{mathpazo}
+
+\usepackage{titlesec}
+
+\titleformat{\chapter}[hang]{\normalfont\huge\bfseries}{\thechapter}{2pc}{}
+\titlespacing*{\chapter}{0pt}{1.5ex plus .2ex minus .2ex}{1.5ex plus .2ex}
+
+\usepackage{tocloft}
+\setlength{\cftchapindent}{0em}   % Ajuste l'indentation des chapitres
+\setlength{\cftchapnumwidth}{3em}  % Ajuste la largeur du numéro de chapitre
+
+
 % Dizaines d'autres possibilités, par exemple iwona, charter...
 % Voir par exemple  http://www.tug.dk/FontCatalogue/mathfonts.html
 \usepackage[T1]{fontenc} % Nécessaire avec certaines police
